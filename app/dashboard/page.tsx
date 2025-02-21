@@ -109,45 +109,28 @@ const Dashboard = () => {
             <div className="p-4">
                 <h1 className="text-2xl font-bold mb-6 text-white">Dashboard</h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
-                <div className="p-6 bg-gray-800 rounded-lg shadow-md">
-                  <h2 className="text-xl font-semibold text-white">Account</h2>
-                  <div className="mt-4 space-y-4">
-                      {/* Displaying Account data */}
-                      {accountData ? (
-                          <>
-                              <p className="text-white">
-                                  <strong>Network Name:</strong> {accountData?.data[0]?.network_name ?? "N/A"}
-                              </p>
-                              <p className="text-white">
-                                  <strong>Address:</strong> {accountData?.data[0]?.address ?? "N/A"}
-                              </p>
-                              <p className="text-white">
-                                  <strong>Network Symbol:</strong> {accountData?.data[0]?.network_symbol ?? "N/A"}
-                              </p>
-                          </>
-                      ) : (
-                          <p className="text-white">No account data available</p>
-                      )}
-                  </div>
-              </div>
-
-                    {/* Accounts and Portfolio */}
+                    {/* Account Data Section */}
                     <div className="p-6 bg-gray-800 rounded-lg shadow-md">
-                        <h2 className="text-xl font-semibold text-white">Portfolio</h2>
-                        <div className="mt-4 space-y-4">
+                        <h2 className="text-xl font-semibold text-white">Account Data (JSON)</h2>
+                        <div className="mt-4">
+                            {accountData ? (
+                                <pre className="p-4 border border-gray-600 rounded-lg bg-gray-700 text-white overflow-x-auto">
+                                    {JSON.stringify(accountData, null, 2)}
+                                </pre>
+                            ) : (
+                                <p className="text-white">No account data available</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Portfolio Data Section */}
+                    <div className="p-6 bg-gray-800 rounded-lg shadow-md">
+                        <h2 className="text-xl font-semibold text-white">Portfolio Data (JSON)</h2>
+                        <div className="mt-4">
                             {portfolioData ? (
-                                <>
-                                    <p className="text-white">
-                                        <strong>Account Balance:</strong> {portfolioData?.aggregated_data?.holdings_count ?? "N/A"}
-                                    </p>
-                                    <p className="text-white">
-                                        <strong>Portfolio Value:</strong> {portfolioData?.aggregated_data?.total_holding_price_usdt ?? "N/A"} USDT
-                                    </p>
-                                    <p className="text-white">
-                                        <strong>Tokens:</strong> {portfolioData?.group_tokens?.map((token: any) => token.symbol).join(", ") ?? "N/A"}
-                                    </p>
-                                </>
+                                <pre className="p-4 border border-gray-600 rounded-lg bg-gray-700 text-white overflow-x-auto">
+                                    {JSON.stringify(portfolioData, null, 2)}
+                                </pre>
                             ) : (
                                 <p className="text-white">No portfolio data available</p>
                             )}
