@@ -103,6 +103,22 @@ const Dashboard = () => {
         );
     }
 
+    // Show loading spinner while Okto authentication is in progress
+    if (isAuthenticating) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+                <Navbar />
+                <div className="p-4">
+                    <h1 className="text-2xl font-bold mb-6 text-white">Dashboard</h1>
+                    <div className="flex justify-center items-center h-64">
+                        <Spinner />
+                        <p className="ml-4 text-white">Authenticating with Okto...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
             <Navbar />

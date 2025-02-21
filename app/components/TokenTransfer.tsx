@@ -1,5 +1,7 @@
 "use client";
-import { getAccount, tokenTransfer, useOkto ,getOrdersHistory} from "@okto_web3/react-sdk";
+// import { getAccount, tokenTransfer, useOkto ,getOrdersHistory} from "@okto_web3/react-sdk";
+import { tokenTransfer } from "@okto_web3/react-sdk/userop";
+import { getAccount, getOrdersHistory, useOkto } from "@okto_web3/react-sdk";
 // import { tokenTransfer } from "@okto_web3/react-sdk/abstracted";
 import { useState } from "react";
  
@@ -32,19 +34,27 @@ export function TokenTransfer() {
             };
  
             // Create the user operation
-            const txHash = await tokenTransfer(oktoClient, transferParams);
+            const userOp = await tokenTransfer(oktoClient, transferParams);
+            console.log('data after tokentransfer:', userOp);
             
            
-           
-            const status= await getOrdersHistory(oktoClient,  {
-                intentId: txHash,
-                intentType: "TOKEN_TRANSFER"
-            });
-            console.log("status of order history", status);
+            const signedOp = await oktoClient.signUserOp(userOp);
+
+            console.log('data after signUserop:', signedOp);
             
-            console.log('Transfer transaction hash:', txHash);
-            setStatus(`Transfer complete! Hash: ${txHash}`);
-            setModalVisible(true);
+            // Execute the transfer
+            const txHash = await oktoClient.executeUserOp(signedOp);
+            
+            console.log('data after executeUserop:', txHash);
+
+            // const status= await getOrdersHistory(oktoClient,  {
+            //     intentId: txHash,
+            //     intentType: "TOKEN_TRANSFER"
+            // });
+            // console.log("status of order history", status);
+            
+            // setStatus(`Transfer complete! Hash: ${txHash}`);
+            // setModalVisible(true);
         } catch (error: any) {
             console.error("Transfer failed:", error);
             setStatus(`Transfer failed: ${error.message}`);

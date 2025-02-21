@@ -52,7 +52,7 @@ export default function Home() {
                     </p>
                     <div className="bg-gray-700 p-4 rounded-lg">
                         <p className="text-gray-200 font-mono break-words">
-                            0x1234567890abcdef1234567890abcdef12345678
+                            0x38588E4C064e0DC4CBF4F06895eBD5a682B878F3
                         </p>
                     </div>
                     <p className="text-gray-300 mt-6">

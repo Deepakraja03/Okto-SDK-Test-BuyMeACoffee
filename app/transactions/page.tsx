@@ -1,44 +1,147 @@
 "use client";
+import { getPortfolioActivity, useOkto } from "@okto_web3/react-sdk";
 import Navbar from "../components/Navbar";
+import { useEffect, useState } from "react";
+
+type Transaction = {
+  symbol: string;
+  image: string;
+  name: string;
+  description: string;
+  amount: string;
+  txHash: string;
+  networkName: string;
+  networkExplorerUrl: string;
+  timestamp: number;
+  groupId: string;
+  orderType: string;
+  transferType: string;
+};
 
 const Transactions = () => {
-    const transactions = [
-        { id: 1, type: "Sent", amount: "0.5 ETH", date: "2023-10-01" },
-        { id: 2, type: "Received", amount: "1.0 ETH", date: "2023-10-02" },
-        { id: 3, type: "Sent", amount: "0.2 ETH", date: "2023-10-03" },
-    ];
+  const oktoClient = useOkto();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-            <Navbar />
-            <div className="p-4">
-                <h1 className="text-2xl font-bold mb-6 text-white">Transactions</h1>
-                <div className="p-6 bg-gray-800 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-white">Transaction History</h2>
-                    <table className="w-full mt-4">
-                        <thead>
-                            <tr>
-                                <th className="text-left text-white">ID</th>
-                                <th className="text-left text-white">Type</th>
-                                <th className="text-left text-white">Amount</th>
-                                <th className="text-left text-white">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {transactions.map((tx) => (
-                                <tr key={tx.id}>
-                                    <td className="text-white">{tx.id}</td>
-                                    <td className="text-white">{tx.type}</td>
-                                    <td className="text-white">{tx.amount}</td>
-                                    <td className="text-white">{tx.date}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+  async function fetchActivity() {
+    try {
+      setIsLoading(true);
+      const activities = await getPortfolioActivity(oktoClient);
+      setTransactions(activities);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      setError('Failed to fetch transaction history');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchActivity();
+  }, []);
+
+  const formatTimestampToIST = (timestamp: number): string => {
+    // Create a date object from the timestamp (in milliseconds)
+    // Since Unix timestamp is in seconds, multiply by 1000
+    const date = new Date(timestamp * 1000);
+    
+    // Format to IST using built-in methods
+    return date.toLocaleString('en-IN', { 
+      timeZone: 'Asia/Kolkata',
+      dateStyle: 'medium',
+      timeStyle: 'medium'
+    });
+  };  
+  
+  
+
+  const truncateHash = (hash: string) => {
+    return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
+  };
+
+  const truncateGroupId = (groupId: string) => {
+    return `${groupId.slice(0, 4)}...${groupId.slice(-4)}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+      <Navbar />
+      <div className="p-4 max-w-7xl mx-auto">
+        <h1 className="text-2xl font-bold mb-6 text-white">Transactions</h1>
+        <div className="p-6 bg-gray-800 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold text-white mb-4">Transaction History</h2>
+          
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-400">Loading transactions...</div>
+          ) : error ? (
+            <div className="text-center py-8 text-red-400">{error}</div>
+          ) : transactions.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">No transactions found</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full mt-4">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="px-4 py-3 text-left text-white">Asset</th>
+                    <th className="px-4 py-3 text-left text-white">Type</th>
+                    <th className="px-4 py-3 text-left text-white">Network</th>
+                    <th className="px-4 py-3 text-left text-white">Amount</th>
+                    <th className="px-4 py-3 text-left text-white">Transaction Hash</th>
+                    <th className="px-4 py-3 text-left text-white">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.map((tx, index) => (
+                    <tr 
+                      key={tx.txHash + index} 
+                      className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          {tx.image && (
+                            <img 
+                              src={tx.image} 
+                              alt={tx.symbol} 
+                              className="w-6 h-6 rounded-full"
+                            />
+                          )}
+                          <div>
+                            <div className="text-white font-medium">{tx.symbol}</div>
+                            <div className="text-gray-400 text-sm">{tx.name}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="text-white">
+                          <div>{tx.orderType}</div>
+                          <div className="text-gray-400 text-sm">{tx.transferType}</div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-white">{tx.networkName}</td>
+                      <td className="px-4 py-3 text-white">{tx.amount}</td>
+                      <td className="px-4 py-3">
+                        <a 
+                          href={`${tx.networkExplorerUrl}/tx/${tx.txHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 transition-colors"
+                        >
+                          {truncateHash(tx.txHash)}
+                        </a>
+                      </td>
+                      <td className="px-4 py-3 text-white">{formatTimestampToIST(tx.timestamp)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          )}
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Transactions;
