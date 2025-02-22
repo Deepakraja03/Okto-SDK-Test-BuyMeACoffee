@@ -2,6 +2,7 @@
 import { getPortfolioActivity, useOkto } from "@okto_web3/react-sdk";
 import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type Transaction = {
   symbol: string;
@@ -61,10 +62,6 @@ const Transactions = () => {
     return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
   };
 
-  const truncateGroupId = (groupId: string) => {
-    return `${groupId.slice(0, 4)}...${groupId.slice(-4)}`;
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       <Navbar />
@@ -101,10 +98,11 @@ const Transactions = () => {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           {tx.image && (
-                            <img 
+                            <Image 
                               src={tx.image} 
                               alt={tx.symbol} 
                               className="w-6 h-6 rounded-full"
+                              width={100} height={100}
                             />
                           )}
                           <div>

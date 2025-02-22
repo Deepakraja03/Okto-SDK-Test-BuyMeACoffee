@@ -5,6 +5,7 @@ import { FaGoogle, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function Navbar() {
     const { data: session, status } = useSession();
@@ -73,10 +74,11 @@ export default function Navbar() {
                                 onMouseEnter={() => setDropdownOpen(true)}
                                 onMouseLeave={() => setDropdownOpen(false)}
                             >
-                                <img
+                                <Image
                                     src={session.user?.image ?? ""}
                                     alt="Profile"
                                     className="w-10 h-10 rounded-full"
+                                    width={100} height={100}
                                 />
                                 {session && (
                                     <span className="font-medium text-white hidden md:block">

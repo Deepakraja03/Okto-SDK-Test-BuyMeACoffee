@@ -13,12 +13,14 @@ const Dashboard = () => {
     const [error, setError] = useState<string | null>(null);
     const [isAuthenticatedWithOkto, setIsAuthenticatedWithOkto] = useState(false);
     const [authenticationFailed, setAuthenticationFailed] = useState(false);
-    const [accountData, setAccountData] = useState<any>(null); // State to hold account data
-    const [portfolioData, setPortfolioData] = useState<any>(null); // State to hold portfolio data
+    const [accountData, setAccountData] = useState<unknown>(null); // State to hold account data
+    const [portfolioData, setPortfolioData] = useState<unknown>(null); // State to hold portfolio data
     const idToken = useMemo(() => (session ? session.id_token : null), [session]);
 
-    // Authenticate with Okto using the Google id_token
-    async function handleAuthenticate(): Promise<any> {
+    // Authenticate with Okto once the idToken is available
+    useEffect(() => {
+        // Authenticate with Okto using the Google id_token
+    async function handleAuthenticate(): Promise<unknown> {
         if (!idToken) {
             setError("No Google login available.");
             console.log("No Google login available", error);
@@ -67,9 +69,6 @@ const Dashboard = () => {
             console.error('Error fetching user account:', error);
         }
     }
-
-    // Authenticate with Okto once the idToken is available
-    useEffect(() => {
         if (idToken && !isAuthenticatedWithOkto && !isAuthenticating && !authenticationFailed) {
             handleAuthenticate();
         }
@@ -77,7 +76,7 @@ const Dashboard = () => {
             fetchAccount();
             fetchPortfolio();
         }
-    }, [idToken, isAuthenticatedWithOkto, isAuthenticating, authenticationFailed]);
+    }, [idToken, isAuthenticatedWithOkto, isAuthenticating, authenticationFailed, error, oktoClient]);
 
     if (status === "loading") {
         return <Spinner />;

@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useMemo } from "react";
-import { useSession, signOut, signIn } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 // import GetButton from "@/app/components/GetButton";
-import { getAccount, useOkto } from '@okto_web3/react-sdk';
+import { useOkto } from '@okto_web3/react-sdk';
 import { useRouter } from "next/navigation"; // For redirecting
 import NavbarHome from "./components/NavbarHome";
 
@@ -11,28 +11,27 @@ export default function Home() {
   const oktoClient = useOkto();
   const router = useRouter();  // For redirection
   
-  //@ts-ignore
   const idToken = useMemo(() => (session ? session.id_token : null), [session]);
 
-  async function handleAuthenticate(): Promise<any> {
-    if (!idToken) {
-      return { result: false, error: "No google login" };
-    }
-    const user = await oktoClient.loginUsingOAuth({
-      idToken: idToken,
-      provider: 'google',
-    });
-    console.log("Authentication Success", user);
-
-    router.push("/dashboard");
-    return JSON.stringify(user);
-  }
-
   useEffect(() => {
+    async function handleAuthenticate(): Promise<unknown> {
+      if (!idToken) {
+        return { result: false, error: "No google login" };
+      }
+      const user = await oktoClient.loginUsingOAuth({
+        idToken: idToken,
+        provider: 'google',
+      });
+      console.log("Authentication Success", user);
+  
+      router.push("/dashboard");
+      return JSON.stringify(user);
+    }
+
     if (idToken) {
       handleAuthenticate();
     }
-  }, [idToken]);
+  }, [idToken, oktoClient, router]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
