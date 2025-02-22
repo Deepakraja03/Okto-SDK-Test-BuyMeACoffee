@@ -26,7 +26,7 @@ export const authOptions = {
       }
       return session;
     },
-    async jwt({ token, account } : { token: JWT, account: Account }) {
+    async jwt({ token, account } : { token: JWT, account: Account | null }) {
       // Store the id_token in the JWT when the user signs in
       if (account?.id_token) {
         token.id_token = account.id_token;

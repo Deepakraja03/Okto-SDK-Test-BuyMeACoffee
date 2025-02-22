@@ -9,7 +9,7 @@ type Transaction = {
   image: string;
   name: string;
   description: string;
-  amount: string;
+  amount?: string;
   txHash: string;
   networkName: string;
   networkExplorerUrl: string;
@@ -30,23 +30,8 @@ const Transactions = () => {
       try {
         setIsLoading(true);
         const activities = await getPortfolioActivity(oktoClient);
-        
-        const formattedTransactions: Transaction[] = activities.map((activity) => ({
-          symbol: activity.symbol || "",
-          image: activity.image || "",
-          name: activity.name || "",
-          description: activity.description || "",
-          amount: activity.amount || "0",
-          txHash: activity.txHash || "",
-          networkName: activity.networkName || "",
-          networkExplorerUrl: activity.networkExplorerUrl || "",
-          timestamp: activity.timestamp || 0,
-          groupId: activity.groupId || "",
-          orderType: activity.orderType || "",
-          transferType: activity.transferType || "",
-        }));
   
-        setTransactions(formattedTransactions);
+        setTransactions(activities);
         setError(null);
       } catch (error) {
         console.error("Error fetching activities:", error);
