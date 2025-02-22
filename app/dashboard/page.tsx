@@ -16,7 +16,7 @@ const Dashboard = () => {
     const [accountData, setAccountData] = useState<unknown>(null); // State to hold account data
     const [portfolioData, setPortfolioData] = useState<unknown>(null); // State to hold portfolio data
     const idToken = useMemo(() => (session ? session.id_token : null), [session]);
-
+    
     // Authenticate with Okto once the idToken is available
     useEffect(() => {
         // Authenticate with Okto using the Google id_token

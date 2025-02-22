@@ -2,7 +2,7 @@
 import { getPortfolioActivity, useOkto } from "@okto_web3/react-sdk";
 import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import Image from "next/image"; 
 
 type Transaction = {
   symbol: string;
@@ -30,13 +30,13 @@ const Transactions = () => {
       try {
         setIsLoading(true);
         const activities = await getPortfolioActivity(oktoClient);
-  
+        
         const formattedTransactions: Transaction[] = activities.map((activity) => ({
           symbol: activity.symbol || "",
           image: activity.image || "",
           name: activity.name || "",
           description: activity.description || "",
-          amount: activity.amount || "0", // Ensure `amount` exists
+          amount: activity.amount || "0",
           txHash: activity.txHash || "",
           networkName: activity.networkName || "",
           networkExplorerUrl: activity.networkExplorerUrl || "",
