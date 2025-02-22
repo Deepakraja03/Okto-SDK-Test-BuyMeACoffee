@@ -25,23 +25,40 @@ const Transactions = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function fetchActivity() {
-    try {
-      setIsLoading(true);
-      const activities = await getPortfolioActivity(oktoClient);
-      setTransactions(activities);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching activities:', error);
-      setError('Failed to fetch transaction history');
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   useEffect(() => {
+    async function fetchActivity() {
+      try {
+        setIsLoading(true);
+        const activities = await getPortfolioActivity(oktoClient);
+  
+        const formattedTransactions: Transaction[] = activities.map((activity) => ({
+          symbol: activity.symbol || "",
+          image: activity.image || "",
+          name: activity.name || "",
+          description: activity.description || "",
+          amount: activity.amount || "0", // Ensure `amount` exists
+          txHash: activity.txHash || "",
+          networkName: activity.networkName || "",
+          networkExplorerUrl: activity.networkExplorerUrl || "",
+          timestamp: activity.timestamp || 0,
+          groupId: activity.groupId || "",
+          orderType: activity.orderType || "",
+          transferType: activity.transferType || "",
+        }));
+  
+        setTransactions(formattedTransactions);
+        setError(null);
+      } catch (error) {
+        console.error("Error fetching activities:", error);
+        setError("Failed to fetch transaction history");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  
     fetchActivity();
-  }, []);
+  }, [oktoClient]);
+  
 
   const formatTimestampToIST = (timestamp: number): string => {
     // Create a date object from the timestamp (in milliseconds)

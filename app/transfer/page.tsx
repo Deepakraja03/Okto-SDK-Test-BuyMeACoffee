@@ -24,10 +24,6 @@ const TransferToken = () => {
     const [exchangeRate, setExchangeRate] = useState<number | null>(null);
 
     const oktoClient = useOkto();
-    if (!oktoClient) {
-        console.error("Okto client is not initialized");
-        return;
-    }
 
     // Fetch account details
     async function getacc() {
@@ -35,10 +31,10 @@ const TransferToken = () => {
             console.error("Okto client is not initialized.");
             return null;
         }
-    
+
         const accounts = await getAccount(oktoClient);
         console.log("Fetched accounts:", accounts);
-    
+
         const baseTestnetAccount = accounts.find(account => account.networkName === "BASE_TESTNET");
         if (!baseTestnetAccount) {
             console.error("No account found for BASE_TESTNET.");
@@ -48,18 +44,11 @@ const TransferToken = () => {
 
     // Convert ETH to WEI
     function ethToWei(ethAmount: string): bigint {
-        // Split the ETH amount into whole and fractional parts
         const [whole, fractional] = ethAmount.split(".");
-    
-        // Convert the whole part to Wei
         const wholeWei = BigInt(whole) * BigInt(10 ** 18);
-    
-        // Convert the fractional part to Wei
         const fractionalWei = fractional
-            ? BigInt(fractional.padEnd(18, "0").slice(0, 18)) // Pad with zeros and truncate to 18 decimal places
+            ? BigInt(fractional.padEnd(18, "0").slice(0, 18))
             : BigInt(0);
-    
-        // Return the total Wei amount
         return wholeWei + fractionalWei;
     }
 
@@ -67,16 +56,13 @@ const TransferToken = () => {
     const storeJobData = (job: Job) => {
         const storedJobs = localStorage.getItem("jobs");
         const existingJobs: Job[] = storedJobs ? JSON.parse(storedJobs) : [];
-        
-        // Update existing job or add new one
         const updatedJobs = existingJobs.some(j => j.id === job.id)
             ? existingJobs.map(j => j.id === job.id ? { ...j, ...job } : j)
             : [...existingJobs, job];
-        
         localStorage.setItem("jobs", JSON.stringify(updatedJobs));
         setJobs(updatedJobs);
     };
-    
+
     // Handle token transfer
     async function handleTransfer() {
         try {
@@ -94,7 +80,6 @@ const TransferToken = () => {
             };
 
             const txHash = await tokenTransfer(oktoClient, transferParams);
-            
             const orderHistoryResponse = await getOrdersHistory(oktoClient, {
                 intentId: txHash,
                 intentType: "TOKEN_TRANSFER"
@@ -117,9 +102,8 @@ const TransferToken = () => {
 
         } catch (error: unknown) {
             console.error("Transfer failed:", error);
-            
             setStatus(`Transfer failed: ${(error as Error).message}`);
-        }        
+        }
     }
 
     // Refresh job status
@@ -140,10 +124,9 @@ const TransferToken = () => {
 
             const updatedStatus = orderHistoryResponse?.[0]?.status || "Unknown";
             const updatedJob = { ...job, status: updatedStatus };
-            
             storeJobData(updatedJob);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to refresh job status:", error);
         }
     };
@@ -153,29 +136,29 @@ const TransferToken = () => {
         const fetchJobStatuses = async () => {
             const storedJobs = localStorage.getItem("jobs");
             if (!storedJobs) return;
-    
+
             const parsedJobs: Job[] = JSON.parse(storedJobs);
-    
             const updatedJobs = await Promise.all(
                 parsedJobs.map(async (job) => {
                     const orderHistoryResponse = await getOrdersHistory(oktoClient, {
                         intentId: job.id,
                         intentType: job.intentType
                     });
-    
                     return {
                         ...job,
                         status: orderHistoryResponse?.[0]?.status || "Unknown"
                     };
                 })
             );
-    
+
             localStorage.setItem("jobs", JSON.stringify(updatedJobs));
             setJobs(updatedJobs);
         };
-    
-        fetchJobStatuses();
-    }, []);
+
+        if (oktoClient) {
+            fetchJobStatuses();
+        }
+    }, [oktoClient]);
 
     // Fetch exchange rate
     useEffect(() => {
@@ -318,8 +301,6 @@ const TransferToken = () => {
                     </div>
                 </div>
             </div>
-            {/* <TokensList />
-            <ChainsList /> */}
         </div>
     );
 };
