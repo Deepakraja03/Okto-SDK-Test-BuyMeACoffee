@@ -1,7 +1,7 @@
 "use client";
 // import { getAccount, tokenTransfer, useOkto ,getOrdersHistory} from "@okto_web3/react-sdk";
 import { tokenTransfer } from "@okto_web3/react-sdk/userop";
-import { getAccount, getOrdersHistory, useOkto } from "@okto_web3/react-sdk";
+import { getAccount, useOkto } from "@okto_web3/react-sdk";
 // import { tokenTransfer } from "@okto_web3/react-sdk/abstracted";
 import { useState } from "react";
  
@@ -55,10 +55,15 @@ export function TokenTransfer() {
             
             // setStatus(`Transfer complete! Hash: ${txHash}`);
             // setModalVisible(true);
-        } catch (error: any) {
-            console.error("Transfer failed:", error);
-            setStatus(`Transfer failed: ${error.message}`);
-        }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error("Transfer failed:", error);
+                setStatus(`Transfer failed: ${error.message}`);
+            } else {
+                console.error("An unknown error occurred:", error);
+                setStatus("An unknown error occurred.");
+            }
+        }        
     }
  
     return (

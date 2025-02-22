@@ -1,15 +1,13 @@
 "use client";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Navbar from "../components/Navbar";
 import Spinner from "../components/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import { getAccount, getPortfolio, useOkto } from "@okto_web3/react-sdk";
-import { useRouter } from "next/navigation";
 
 const Dashboard = () => {
     const { data: session, status } = useSession();
     const oktoClient = useOkto();
-    const router = useRouter();
 
     const [isAuthenticating, setIsAuthenticating] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -23,6 +21,7 @@ const Dashboard = () => {
     async function handleAuthenticate(): Promise<any> {
         if (!idToken) {
             setError("No Google login available.");
+            console.log("No Google login available", error);
             setAuthenticationFailed(true); // Mark authentication failure
             return { result: false, error: "No google login" };
         }
@@ -46,17 +45,6 @@ const Dashboard = () => {
             setIsAuthenticating(false);
             console.error("Authentication Error:", err);
             return { result: false, error: "Okto authentication failed." };
-        }
-    }
-
-    // Handle logout and redirect to the homepage
-    async function handleLogout() {
-        try {
-            setIsAuthenticatedWithOkto(false);
-            signOut();
-            router.push("/"); // Redirect to homepage after logout
-        } catch (error) {
-            console.error("Logout failed", error);
         }
     }
 

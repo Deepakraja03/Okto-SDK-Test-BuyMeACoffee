@@ -27,6 +27,7 @@ const CheckJobStatus = () => {
         });
         console.log("status of order history", status);
     } catch (error) {
+      console.log("Error fetching status", error);
       setStatus("Failed to fetch status.");
     } finally {
       setLoading(false);

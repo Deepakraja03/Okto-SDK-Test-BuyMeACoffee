@@ -1,11 +1,8 @@
 "use client";
-import { useSession, signIn, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { FaGoogle } from "react-icons/fa";
 
 export function LoginButton() {
-  const { data: session } = useSession(); // Get session data
-  const router = useRouter();
   
   const handleLogin = () => {
     signIn("google", {  

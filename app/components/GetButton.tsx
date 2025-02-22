@@ -1,43 +1,44 @@
 "use client";
 import React, { useState } from "react";
-import { useOkto } from "@okto_web3/react-sdk";
- 
+import { OktoClient, useOkto } from "@okto_web3/react-sdk";
+
 interface GetButtonProps {
     title: string;
-    apiFn: any;
+    apiFn: (client: OktoClient) => Promise<unknown>; // More specific type definition
 }
- 
+
 const GetButton: React.FC<GetButtonProps> = ({ title, apiFn }) => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [resultData, setResultData] = useState("");
+    const [resultData, setResultData] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
     const oktoClient = useOkto();
- 
-    const handleButtonClick = () => {
-        apiFn(oktoClient)
-        .then((result: any) => {
+
+    const handleButtonClick = async () => {
+        setLoading(true);
+        try {
+            const result = await apiFn(oktoClient);
             console.log(`${title}:`, result);
-            const resultData = JSON.stringify(result, null, 2);
-            setResultData(resultData !== "null" ? resultData : "No result");
-            setModalVisible(true);
-        })
-        .catch((error: any) => {
+            setResultData(JSON.stringify(result, null, 2) || "No result");
+        } catch (error) {
             console.error(`${title} error:`, error);
-            setResultData(`error: ${error}`);
+            const errorMessage = error instanceof Error ? error.message : "Something went wrong";
+            setResultData(`Error: ${errorMessage}`);
+        } finally {
+            setLoading(false);
             setModalVisible(true);
-        });
+        }
     };
- 
-    const handleClose = () => setModalVisible(false);
- 
+
     return (
         <div className="text-center text-white">
             <button
-                className="px-4 py-2 w-full bg-blue-500 text-white rounded"
+                className="px-4 py-2 w-full bg-blue-500 text-white rounded disabled:opacity-50"
                 onClick={handleButtonClick}
+                disabled={loading}
             >
-                {title}
+                {loading ? "Loading..." : title}
             </button>
- 
+
             {modalVisible && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
                     <div className="bg-black rounded-lg w-11/12 max-w-2xl p-6">
@@ -45,7 +46,8 @@ const GetButton: React.FC<GetButtonProps> = ({ title, apiFn }) => {
                             <h2 className="text-lg font-semibold">{title} Result</h2>
                             <button
                                 className="text-gray-500 hover:text-gray-700"
-                                onClick={handleClose}
+                                onClick={() => setModalVisible(false)}
+                                aria-label="Close"
                             >
                                 ×
                             </button>
@@ -58,7 +60,7 @@ const GetButton: React.FC<GetButtonProps> = ({ title, apiFn }) => {
                         <div className="mt-4 text-right">
                             <button
                                 className="px-4 py-2 bg-gray-500 text-white rounded"
-                                onClick={handleClose}
+                                onClick={() => setModalVisible(false)}
                             >
                                 Close
                             </button>
@@ -69,5 +71,5 @@ const GetButton: React.FC<GetButtonProps> = ({ title, apiFn }) => {
         </div>
     );
 };
- 
+
 export default GetButton;
