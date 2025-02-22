@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { FaSync } from "react-icons/fa";
 import Navbar from "../components/Navbar";
-import { getAccount, getOrdersHistory, INTENT_TYPE, tokenTransfer, useOkto } from "@okto_web3/react-sdk";
+import { getAccount, getOrdersHistory, getPortfolio, INTENT_TYPE, tokenTransfer, useOkto } from "@okto_web3/react-sdk";
 
 type Job = {
   id: string;
@@ -22,7 +22,9 @@ const TransferToken = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedToken, setSelectedToken] = useState<"ETH" | "LINK">("ETH");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
-
+  const [portfolioData, setPortfolioData] = useState<unknown>(null);
+  const [baseTestnetBalance, setBaseTestnetBalance] = useState<string | null>(null);
+  const [isFetchingPortfolio, setIsFetchingPortfolio] = useState(false); // Loading state
   const oktoClient = useOkto();
 
   // Fetch account details
@@ -33,7 +35,6 @@ const TransferToken = () => {
     }
 
     const accounts = await getAccount(oktoClient);
-    console.log("Fetched accounts:", accounts);
 
     const baseTestnetAccount = accounts.find(
       (account) => account.networkName === "BASE_TESTNET"
@@ -63,6 +64,31 @@ const TransferToken = () => {
       : [...existingJobs, job];
     localStorage.setItem("jobs", JSON.stringify(updatedJobs));
     setJobs(updatedJobs);
+  };
+
+  // Fetch portfolio data and extract BASE_TESTNET balance
+  const fetchPortfolio = async () => {
+    try {
+      setIsFetchingPortfolio(true); // Start loading
+      const portfolio = await getPortfolio(oktoClient);
+      setPortfolioData(portfolio);
+
+      // Extract balance of BASE_TESTNET
+      if (portfolio?.groupTokens) {
+        const baseTestnetToken = portfolio.groupTokens.find(
+          (token) => token.networkName === "BASE_TESTNET"
+        );
+        if (baseTestnetToken) {
+          setBaseTestnetBalance(baseTestnetToken.holdingsPriceUsdt);
+        } else {
+          setBaseTestnetBalance(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching portfolio:", error);
+    } finally {
+      setIsFetchingPortfolio(false); // Stop loading
+    }
   };
 
   // Handle token transfer
@@ -101,6 +127,9 @@ const TransferToken = () => {
       storeJobData(newJob);
       setStatus(`Transfer complete! Hash: ${txHash}`);
       setModalVisible(true);
+
+      // Refetch portfolio to update balance immediately
+      await fetchPortfolio();
     } catch (error: unknown) {
       console.error("Transfer failed:", error);
       setStatus(`Transfer failed: ${(error as Error).message}`);
@@ -195,12 +224,45 @@ const TransferToken = () => {
     );
   };
 
+  // Fetch portfolio data on component mount
+  useEffect(() => {
+    fetchPortfolio();
+  }, [oktoClient]);
+
+  // Check if the user has sufficient balance
+  // Check if the user has sufficient balance
+  const isInsufficientBalance = (usdAmount: number): boolean => {
+    if (!baseTestnetBalance) return true; // If balance is not available, assume insufficient
+    return parseFloat(baseTestnetBalance) < usdAmount;
+  };
+
+  // Disable the "Send" button if the amount is greater than the balance
+  const isSendButtonDisabled = (): boolean => {
+    if (!amount || !baseTestnetBalance) return true;
+    return parseFloat(baseTestnetBalance) < parseFloat(amount);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       <Navbar />
       <div className="p-4 max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6 text-white">Transfer Token</h1>
-
+      <h1 className="text-2xl font-bold mb-6 text-center text-white">Transfer Token</h1>
+        <div className="mt-4 mb-4">
+          {portfolioData ? (
+            <div className="p-2 border border-gray-600 rounded-lg bg-gray-700 text-white inline-flex items-center space-x-2">
+              <span className="text-sm font-semibold">Balance:</span>
+              {isFetchingPortfolio ? (
+                <span className="text-sm text-gray-400">Updating...</span>
+              ) : baseTestnetBalance !== null ? (
+                <span className="text-sm font-medium">{baseTestnetBalance} USDT</span>
+              ) : (
+                <span className="text-sm text-gray-400">N/A</span>
+              )}
+            </div>
+            ) : (
+              <p className="text-white text-sm">No portfolio data available</p>
+            )}
+        </div>
         {/* Token Transfer Form */}
         <div className="bg-gray-800 rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-semibold text-white mb-4">
@@ -208,24 +270,23 @@ const TransferToken = () => {
           </h2>
           <div className="space-y-4">
             <div className="flex space-x-2">
-              <button
-                onClick={() => handleAmountClick(1)}
-                className="flex-1 bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded"
-              >
-                1$
-              </button>
-              <button
-                onClick={() => handleAmountClick(2)}
-                className="flex-1 bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded"
-              >
-                2$
-              </button>
-              <button
-                onClick={() => handleAmountClick(5)}
-                className="flex-1 bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded"
-              >
-                5$
-              </button>
+              {[1, 2, 5].map((usdAmount) => (
+                <button
+                  key={usdAmount}
+                  onClick={() => handleAmountClick(usdAmount)}
+                  className={`flex-1 px-4 py-2 rounded ${
+                    isInsufficientBalance(usdAmount)
+                      ? "bg-red-500 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-700"
+                  } text-white`}
+                  disabled={isInsufficientBalance(usdAmount)}
+                  title={
+                    isInsufficientBalance(usdAmount) ? "Insufficient balance" : ""
+                  }
+                >
+                  {usdAmount}$
+                </button>
+              ))}
             </div>
             <div className="flex space-x-2">
               <button
@@ -247,7 +308,12 @@ const TransferToken = () => {
             </div>
             <button
               onClick={handleTransfer}
-              className="w-full bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded"
+              className={`w-full px-4 py-2 rounded ${
+                isSendButtonDisabled()
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-700"
+              } text-white`}
+              disabled={isSendButtonDisabled()}
             >
               Send
             </button>

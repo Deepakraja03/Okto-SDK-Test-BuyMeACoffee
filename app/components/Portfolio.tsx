@@ -6,7 +6,8 @@ const Portfolio = () => {
     async function fetchPortfolio() {
         try {
             const portfolio = await getPortfolio(oktoClient);
-            console.log('Portfolio data:', portfolio);
+            return portfolio;
+            // console.log('Portfolio data:', portfolio);
         } catch (error) {
             console.error('Error fetching portfolio:', error);
         }
@@ -15,7 +16,8 @@ const Portfolio = () => {
     async function fetchActivity() {
         try {
             const activities = await getPortfolioActivity(oktoClient);
-            console.log('Portfolio activities:', activities);
+            return activities;
+            // console.log('Portfolio activities:', activities);
         } catch (error) {
             console.error('Error fetching activities:', error);
         }

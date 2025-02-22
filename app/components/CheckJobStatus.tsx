@@ -25,7 +25,8 @@ const CheckJobStatus = () => {
             intentId: jobId,
             intentType: "TOKEN_TRANSFER"
         });
-        console.log("status of order history", status);
+        return status;
+        // console.log("status of order history", status);
     } catch (error) {
       console.log("Error fetching status", error);
       setStatus("Failed to fetch status.");

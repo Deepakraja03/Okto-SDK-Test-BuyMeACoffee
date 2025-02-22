@@ -7,7 +7,8 @@ export function TokensList() {
     async function fetchTokens() {
         try {
             const tokens = await getTokens(oktoClient);
-            console.log('Supported tokens:', tokens);
+            return tokens;
+            // console.log('Supported tokens:', tokens);
         } catch (error) {
             console.error('Error fetching tokens:', error);
         }
@@ -26,7 +27,8 @@ export function ChainsList() {
     async function fetchChains() {
         try {
             const chains = await getChains(oktoClient);
-            console.log('Supported chains:', chains);
+            return chains;
+            // console.log('Supported chains:', chains);
         } catch (error) {
             console.error('Error fetching chains:', error);
         }

@@ -24,7 +24,7 @@ export function TokenTransfer() {
                 throw new Error("Sender account or address is invalid.");
             }
             // const recipient = senderAccount.address as `0x${string}`;
-            console.log("recipient account caipId", senderAccount?.caipId);
+            // console.log("recipient account caipId", senderAccount?.caipId);
             const recipient : `0x${string}` = "0x38588E4C064e0DC4CBF4F06895eBD5a682B878F3"
             const transferParams = {
                 amount: BigInt("100000000000000"), // 1 token with 18 decimals
@@ -35,17 +35,17 @@ export function TokenTransfer() {
  
             // Create the user operation
             const userOp = await tokenTransfer(oktoClient, transferParams);
-            console.log('data after tokentransfer:', userOp);
+            // console.log('data after tokentransfer:', userOp);
             
            
             const signedOp = await oktoClient.signUserOp(userOp);
 
-            console.log('data after signUserop:', signedOp);
+            // console.log('data after signUserop:', signedOp);
             
             // Execute the transfer
             const txHash = await oktoClient.executeUserOp(signedOp);
             
-            console.log('data after executeUserop:', txHash);
+            // console.log('data after executeUserop:', txHash);
 
             // const status= await getOrdersHistory(oktoClient,  {
             //     intentId: txHash,
@@ -55,6 +55,7 @@ export function TokenTransfer() {
             
             // setStatus(`Transfer complete! Hash: ${txHash}`);
             // setModalVisible(true);
+            return txHash;
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error("Transfer failed:", error);

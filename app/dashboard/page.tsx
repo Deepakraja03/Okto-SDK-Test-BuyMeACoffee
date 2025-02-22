@@ -36,7 +36,7 @@ const Dashboard = () => {
                 idToken: idToken,
                 provider: "google",
             });
-            console.log("Authentication Success", user);
+            // console.log("Authentication Success", user);
 
             setIsAuthenticatedWithOkto(true);
             setIsAuthenticating(false);
@@ -53,7 +53,7 @@ const Dashboard = () => {
     async function fetchPortfolio() {
         try {
             const portfolio = await getPortfolio(oktoClient);
-            console.log('Portfolio data:', portfolio);
+            // console.log('Portfolio data:', portfolio);
             setPortfolioData(portfolio);
         } catch (error) {
             console.error('Error fetching portfolio:', error);
@@ -63,7 +63,7 @@ const Dashboard = () => {
     async function fetchAccount() {
         try {
             const account = await getAccount(oktoClient);
-            console.log('Account data:', account);
+            // ('Account data:', account);
             setAccountData(account);
         } catch (error) {
             console.error('Error fetching user account:', error);

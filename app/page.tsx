@@ -22,7 +22,7 @@ export default function Home() {
         idToken: idToken,
         provider: 'google',
       });
-      console.log("Authentication Success", user);
+      // console.log("Authentication Success", user);
   
       router.push("/dashboard");
       return JSON.stringify(user);

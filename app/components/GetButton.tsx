@@ -17,7 +17,7 @@ const GetButton: React.FC<GetButtonProps> = ({ title, apiFn }) => {
         setLoading(true);
         try {
             const result = await apiFn(oktoClient);
-            console.log(`${title}:`, result);
+            // console.log(`${title}:`, result);
             setResultData(JSON.stringify(result, null, 2) || "No result");
         } catch (error) {
             console.error(`${title} error:`, error);
