@@ -47,6 +47,13 @@ export default function Navbar() {
                         Transfer Token
                     </Link>
                     <Link
+                        href="/rawtransaction"
+                        className="text-white hover:text-blue-500 transition-colors px-3 py-2 rounded-lg hover:bg-gray-700"
+                        onClick={() => handleNavigation("/rawtransaction")}
+                    >
+                        Raw Transaction
+                    </Link>
+                    <Link
                         href="/transactions"
                         className="text-white hover:text-blue-500 transition-colors px-3 py-2 rounded-lg hover:bg-gray-700"
                         onClick={() => handleNavigation("/transactions")}

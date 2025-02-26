@@ -23,7 +23,7 @@ const CheckJobStatus = () => {
     try {
         const status= await getOrdersHistory(oktoClient,  {
             intentId: jobId,
-            intentType: "TOKEN_TRANSFER"
+            intentType: "RAW_TRANSACTION",
         });
         return status;
         // console.log("status of order history", status);

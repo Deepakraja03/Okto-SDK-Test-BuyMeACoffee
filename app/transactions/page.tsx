@@ -10,7 +10,7 @@ type Transaction = {
   name: string;
   description: string;
   amount?: string;
-  txHash: string;
+  txHash: string; 
   networkName: string;
   networkExplorerUrl: string;
   timestamp: number;
