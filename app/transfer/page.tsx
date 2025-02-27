@@ -226,6 +226,29 @@ const TransferToken = () => {
 
   // Fetch portfolio data on component mount
   useEffect(() => {
+    const fetchPortfolio = async () => {
+      try {
+        setIsFetchingPortfolio(true); // Start loading
+        const portfolio = await getPortfolio(oktoClient);
+        setPortfolioData(portfolio);
+  
+        // Extract balance of BASE_TESTNET
+        if (portfolio?.groupTokens) {
+          const baseTestnetToken = portfolio.groupTokens.find(
+            (token) => token.networkName === "BASE_TESTNET"
+          );
+          if (baseTestnetToken) {
+            setBaseTestnetBalance(baseTestnetToken.holdingsPriceUsdt);
+          } else {
+            setBaseTestnetBalance(null);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching portfolio:", error);
+      } finally {
+        setIsFetchingPortfolio(false); // Stop loading
+      }
+    };
     fetchPortfolio();
   }, [oktoClient]);
 
