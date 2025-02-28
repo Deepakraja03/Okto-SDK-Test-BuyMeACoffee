@@ -24,10 +24,9 @@ const TransferToken = () => {
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [portfolioData, setPortfolioData] = useState<unknown>(null);
   const [baseTestnetBalance, setBaseTestnetBalance] = useState<string | null>(null);
-  const [isFetchingPortfolio, setIsFetchingPortfolio] = useState(false); // Loading state
+  const [isFetchingPortfolio, setIsFetchingPortfolio] = useState(false);
   const oktoClient = useOkto();
 
-  // Fetch account details
   async function getacc() {
     if (!oktoClient) {
       console.error("Okto client is not initialized.");
@@ -45,7 +44,6 @@ const TransferToken = () => {
     return baseTestnetAccount;
   }
 
-  // Convert ETH to WEI
   function ethToWei(ethAmount: string): bigint {
     const [whole, fractional] = ethAmount.split(".");
     const wholeWei = BigInt(whole) * BigInt(10 ** 18);
@@ -55,7 +53,6 @@ const TransferToken = () => {
     return wholeWei + fractionalWei;
   }
 
-  // Store job data in localStorage
   const storeJobData = (job: Job) => {
     const storedJobs = localStorage.getItem("jobs");
     const existingJobs: Job[] = storedJobs ? JSON.parse(storedJobs) : [];
@@ -66,14 +63,12 @@ const TransferToken = () => {
     setJobs(updatedJobs);
   };
 
-  // Fetch portfolio data and extract BASE_TESTNET balance
   const fetchPortfolio = async () => {
     try {
-      setIsFetchingPortfolio(true); // Start loading
+      setIsFetchingPortfolio(true);
       const portfolio = await getPortfolio(oktoClient);
       setPortfolioData(portfolio);
 
-      // Extract balance of BASE_TESTNET
       if (portfolio?.groupTokens) {
         const baseTestnetToken = portfolio.groupTokens.find(
           (token) => token.networkName === "BASE_TESTNET"
@@ -87,11 +82,10 @@ const TransferToken = () => {
     } catch (error) {
       console.error("Error fetching portfolio:", error);
     } finally {
-      setIsFetchingPortfolio(false); // Stop loading
+      setIsFetchingPortfolio(false);
     }
   };
 
-  // Handle token transfer
   async function handleTransfer() {
     try {
       const senderAccount = await getacc();
@@ -128,7 +122,6 @@ const TransferToken = () => {
       setStatus(`Transfer complete! Hash: ${txHash}`);
       setModalVisible(true);
 
-      // Refetch portfolio to update balance immediately
       await fetchPortfolio();
     } catch (error: unknown) {
       console.error("Transfer failed:", error);
@@ -136,7 +129,6 @@ const TransferToken = () => {
     }
   }
 
-  // Refresh job status
   const refreshJobStatus = async (jobId: string) => {
     try {
       const storedJobs = localStorage.getItem("jobs");
@@ -160,7 +152,6 @@ const TransferToken = () => {
     }
   };
 
-  // Load and refresh all jobs on component mount
   useEffect(() => {
     const fetchJobStatuses = async () => {
       const storedJobs = localStorage.getItem("jobs");
@@ -189,7 +180,6 @@ const TransferToken = () => {
     }
   }, [oktoClient]);
 
-  // Fetch exchange rate
   useEffect(() => {
     const fetchExchangeRate = async () => {
       try {
@@ -206,7 +196,6 @@ const TransferToken = () => {
     fetchExchangeRate();
   }, []);
 
-  // Handle amount button click
   const handleAmountClick = (usdAmount: number) => {
     if (exchangeRate) {
       const ethAmount = usdAmount / exchangeRate;
@@ -216,7 +205,6 @@ const TransferToken = () => {
     }
   };
 
-  // Handle token selection
   const handleTokenSelection = (token: "ETH" | "LINK") => {
     setSelectedToken(token);
     setTokenAddress(
@@ -224,15 +212,13 @@ const TransferToken = () => {
     );
   };
 
-  // Fetch portfolio data on component mount
   useEffect(() => {
     const fetchPortfolio = async () => {
       try {
-        setIsFetchingPortfolio(true); // Start loading
+        setIsFetchingPortfolio(true); 
         const portfolio = await getPortfolio(oktoClient);
         setPortfolioData(portfolio);
-  
-        // Extract balance of BASE_TESTNET
+
         if (portfolio?.groupTokens) {
           const baseTestnetToken = portfolio.groupTokens.find(
             (token) => token.networkName === "BASE_TESTNET"
@@ -246,20 +232,17 @@ const TransferToken = () => {
       } catch (error) {
         console.error("Error fetching portfolio:", error);
       } finally {
-        setIsFetchingPortfolio(false); // Stop loading
+        setIsFetchingPortfolio(false);
       }
     };
     fetchPortfolio();
   }, [oktoClient]);
 
-  // Check if the user has sufficient balance
-  // Check if the user has sufficient balance
   const isInsufficientBalance = (usdAmount: number): boolean => {
-    if (!baseTestnetBalance) return true; // If balance is not available, assume insufficient
+    if (!baseTestnetBalance) return true;
     return parseFloat(baseTestnetBalance) < usdAmount;
   };
 
-  // Disable the "Send" button if the amount is greater than the balance
   const isSendButtonDisabled = (): boolean => {
     if (!amount || !baseTestnetBalance) return true;
     return parseFloat(baseTestnetBalance) < parseFloat(amount);
@@ -276,7 +259,7 @@ const TransferToken = () => {
               <span className="text-sm font-semibold">Balance:</span>
               {isFetchingPortfolio ? (
                 <span className="text-sm text-gray-400">Updating...</span>
-              ) : baseTestnetBalance !== null ? (
+              ) : baseTestnetBalance !== null ? ( 
                 <span className="text-sm font-medium">{baseTestnetBalance} USDT</span>
               ) : (
                 <span className="text-sm text-gray-400">N/A</span>
@@ -286,7 +269,6 @@ const TransferToken = () => {
               <p className="text-white text-sm">No portfolio data available</p>
             )}
         </div>
-        {/* Token Transfer Form */}
         <div className="bg-gray-800 rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-semibold text-white mb-4">
             Transfer Form
@@ -343,7 +325,6 @@ const TransferToken = () => {
           </div>
         </div>
 
-        {/* Status Modal */}
         {modalVisible && (
           <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
             <div className="bg-black rounded-lg w-11/12 max-w-2xl p-6">
@@ -358,7 +339,6 @@ const TransferToken = () => {
           </div>
         )}
 
-        {/* Job Status Table */}
         <div className="bg-gray-800 rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold text-white mb-4">Job Status</h2>
           <div className="overflow-x-auto">
